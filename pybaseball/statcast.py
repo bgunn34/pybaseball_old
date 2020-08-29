@@ -61,13 +61,29 @@ def large_request(start_dt,end_dt,d1,d2,step,verbose):
         # if these dates are detected, check if the next season is within the user's query
         # if yes, fast-forward to the next season to avoid empty requests
         # if no, break the loop. all useful data has been pulled.
-        if ((d.month < 4 and d.day < 15) or (d1.month > 10 and d1.day > 14)):
+        
+        # the below code would cause a date before the start of the regular season to skip a year.
+        # for insance 03-01-2018 would become 3-15-2019. Fixed below
+        # if ((d.month < 4 and d.day < 15) or (d1.month > 10 and d1.day > 14)):
+        #     if d2.year > d.year:
+        #         print('Skipping offseason dates')
+        #         d1 = d1.replace(month=3,day=15,year=d1.year+1)
+        #         d = d1 + datetime.timedelta(days=step+1)
+        #     else:
+        #         break
+
+        if d.month < 4 and d.day < 15:
+            print('Skipping offseason dates')
+            d1 = d1.replace(month=3,day=15,year=d1.year)
+            d = d1 + datetime.timedelta(days=step+1)
+        elif d1.month > 10 and d1.day > 14:
             if d2.year > d.year:
-                print('Skipping offseason dates')
-                d1 = d1.replace(month=3,day=15,year=d1.year+1)
-                d = d1 + datetime.timedelta(days=step+1)
-            else:
-                break
+                if d2.year > d.year:
+                    print('Skipping offseason dates')
+                    d1 = d1.replace(month=3,day=15,year=d1.year+1)
+                    d = d1 + datetime.timedelta(days=step+1)
+                else:
+                    break
 
         start_dt = d1.strftime('%Y-%m-%d')
         intermediate_end_dt = d.strftime('%Y-%m-%d')
